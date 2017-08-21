@@ -354,6 +354,27 @@ class CourseEmailForm(forms.Form):
         EmailTemplate.send_to_users_in_courses(self.template, [self.instance], self.recipient_groups, use_cc=True, request=request)
 
 
+class RemindResponsibleForm(forms.Form):
+    recipient = UserModelChoiceField(label=_("Responsible"), queryset=UserProfile.objects.all())
+    subject = forms.CharField(label=_("Subject"))
+    body = forms.CharField(widget=forms.Textarea(), label=_("Message"))
+
+    def __init__(self, *args, **kwargs):
+        self.template = EmailTemplate()
+        self.recipient = kwargs.pop('responsible')
+
+        kwargs.update(initial={
+            'subject': 'asd',
+            'body': kwargs.pop('body', None),
+        })
+        super().__init__(*args, **kwargs)
+
+    def send(self, request):
+        self.template.subject = self.cleaned_data.get('subject')
+        self.template.body = self.cleaned_data.get('body')
+        EmailTemplate.send_to_user(self.recipient, self.template, request=request)
+
+
 class QuestionnaireForm(forms.ModelForm):
 
     class Meta:

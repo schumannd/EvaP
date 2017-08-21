@@ -27,7 +27,7 @@ from evap.staff.forms import ContributionForm, AtLeastOneFormSet, CourseForm, Co
                              SemesterForm, UserForm, ContributionFormSet, FaqSectionForm, FaqQuestionForm, \
                              UserImportForm, TextAnswerForm, DegreeForm, SingleResultForm, ExportSheetForm, \
                              UserMergeSelectionForm, CourseTypeForm, UserBulkDeleteForm, CourseTypeMergeSelectionForm, \
-                             CourseParticipantCopyForm
+                             CourseParticipantCopyForm, RemindResponsibleForm
 from evap.staff.importers import EnrollmentImporter, UserImporter
 from evap.staff.tools import custom_redirect, delete_navbar_cache, merge_users, bulk_delete_users, save_import_file, \
                              get_import_file_content_or_raise, delete_import_file, import_file_exists, forward_messages
@@ -1253,3 +1253,17 @@ def faq_section(request, section_id):
     else:
         template_data = dict(formset=formset, section=section, questions=questions)
         return render(request, "staff_faq_section.html", template_data)
+
+
+@staff_required
+def send_reminder(request, semester_id, responsible_id):
+    responsible = get_object_or_404(UserProfile, id=responsible_id)
+    semester = get_object_or_404(Semester, id=semester_id)
+    form = RemindResponsibleForm(request.POST or None, responsible=responsible)
+
+    if form.is_valid():
+        form.send(request)
+        messages.success(request, _("Successfully sent reminder to .") % responsible.full_name)
+        return custom_redirect('staff:semester_todo', semester_id)
+    else:
+        return render(request, "staff_semester_send_reminder.html", dict(semester=semester, responsible=responsible, form=form))

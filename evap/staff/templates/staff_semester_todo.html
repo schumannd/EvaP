@@ -12,12 +12,13 @@
 
     {% for responsible, courses, delegates in responsible_list %}
         <div class="panel panel-default">
-            <div class="panel-heading"><b><a href="{% url "staff:user_edit" responsible.id %}">{{ responsible.full_name }}</a></b>, {% trans "Delegate" %}:
+            <div class="panel-heading" style="height:50px;"><b><a href="{% url "staff:user_edit" responsible.id %}">{{ responsible.full_name }}</a></b>, {% trans "Delegate" %}:
                 {% for delegate in delegates %}
                     <a href="{% url "staff:user_edit" delegate.id %}">{{ delegate.full_name }}</a>{% if not forloop.last %},{% endif %}
                 {% empty %}
                     &mdash;
                 {% endfor %}
+            <a href="{% url "staff:send_reminder" semester.id responsible.id %}" class="btn btn-sm btn-default" style="float:right">{% trans "Send Reminder" %}</a>
             </div>
             <div class="panel-body">
                 <table class="table table-striped">
